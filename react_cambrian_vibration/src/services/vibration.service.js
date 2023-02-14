@@ -12,6 +12,7 @@ class VibrationDataService {
         return http.post('/daterange', data);
     }*/
     getsensorbydaterange(data) {
+        
         return http.post('/sensordata', data, {headers: authHeader()});
     }
     getsensoridlist() {
@@ -60,6 +61,7 @@ class VibrationDataService {
         return http.post('/client', data, {headers: authHeader()});
     }
     updateclient(id, data) {
+        
         return http.put(`/client/${id}`, data, {headers: authHeader()});
     }
     deleteclient(id) {
@@ -69,11 +71,29 @@ class VibrationDataService {
         return http.post('/sensor', data, {headers: authHeader()});
     }
     updatesensor(id, data) {
+       
         return http.put(`/sensor/${id}`, data, {headers: authHeader()});
     }
     deletesensor(id) {
+
         return http.delete(`/sensor/${id}`, {headers: authHeader()});
     }
+   
+    getLocationOfClient(client_id){
+ 
+        return http.get(`/locationsbyclient/client_id/${client_id}`,{headers: authHeader()});       
+        
+    } 
+    getSensorsByLocation(data){
+        console.log(data);
+          return http.get(`/sensor/locations`,{ params: { data } },{headers: {'Content-Type': 'application/json'},});
+    }
+
+    getreportdata(data){
+        console.log(data);
+          return http.get(`/sensordata/fetchreportdata`,{ params: { data } },{headers: {'Content-Type': 'application/json'},});
+    }
+    
 }
 
 export default new VibrationDataService();

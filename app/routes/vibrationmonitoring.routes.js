@@ -2,6 +2,7 @@ const vibrationmonitoringroutes = (app) => {
     const sensordata = require("../controllers/sensordata.controller");
     const sensor = require("../controllers/sensor.controller");
     const location = require("../controllers/location.controller");
+    const locationsbyclient = require("../controllers/locationsbyclient.controller");
     const client = require("../controllers/client.controller");
     const auth = require("../controllers/auth.controller");
     const routers = require("../controllers/router.controller");
@@ -85,8 +86,16 @@ const vibrationmonitoringroutes = (app) => {
 
     router.post("/linkedhistory", [authJWT.verifyToken], [authJWT.isAdmin], linkedhistory.create);
 
-    app.use("/", router);
+    router.post("/", [authJWT.verifyToken], [authJWT.isAdmin], linkedhistory.create);
+
+    router.get("/locationsbyclient/client_id/:client_id",[authJWT.verifyToken], [authJWT.isAdmin],locationsbyclient.findAllActiveLocationsByClient);
     
+    router.get("/sensor/locations",sensor.findAllActiveSensorsByLocations);
+
+    router.get("/sensordata/fetchreportdata",sensordata.findreportdata);
+   
+    app.use("/", router);
+      
 }
 
 module.exports = vibrationmonitoringroutes;

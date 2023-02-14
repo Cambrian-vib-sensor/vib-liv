@@ -83,6 +83,30 @@ exports.findSensorIds = (req, res) => {
   });
 }
 
+exports.findreportdata = (req,res) => {
+  const reportdata = req.query.data;
+  const sensor_id=reportdata.reportsensorids;
+  SensorData.findAll({
+    where: {          
+     id: {
+         [Op.in]: sensor_id,
+       },
+       }   
+     }
+   )
+  .then((data) => {
+   res.send(data);
+   console.log(data);
+ }).catch(err => {
+   res.status(500).send({
+     message:
+       err.message || "Some error occurred while retrieving location info."
+   });
+ });
+
+}
+
+
 exports.update = (req, res)=> {
 
 };

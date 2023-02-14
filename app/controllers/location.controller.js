@@ -2,6 +2,7 @@ const db = require("../models");
 const Location = db.location;
 
 exports.bulkcreate = (req, res)=> {
+ 
   // Validate request
   if (!req.body.locations) {
       res.status(400).send({
@@ -24,6 +25,7 @@ exports.bulkcreate = (req, res)=> {
 };
 
 exports.findAllActive = (req, res)=> {
+  
   Location.findAll({
     include: {model: db.client,
               where: {status: 'A'}
@@ -43,6 +45,7 @@ exports.findAllActive = (req, res)=> {
 
 
 exports.findAll = (req, res)=> {
+ 
     Location.findAll({
       include: {model: db.client},
     })
@@ -57,7 +60,25 @@ exports.findAll = (req, res)=> {
     });
 };
 
+exports.findAllActiveByClient = (req, res)=> {
+  console.log(req.params.client_id);
+    Location.findAllActiveByClient({
+     where: { status : 'A' , client_id : req.params.client_id}
+  })
+  .then((data) => {
+    res.send(data);
+    console.log(data);
+  })
+  .catch(err => {
+    res.status(500).send({
+      message:
+        err.message || "Some error occurred while retrieving location info."
+    });
+  });
+};
+
 exports.findOne = (req, res)=> {
+
     const id = req.params.id;
 
     Location.findByPk(id)
@@ -78,6 +99,7 @@ exports.findOne = (req, res)=> {
 };
 
 exports.create = (req, res) => {
+  
   // Save Location to Database
   Location.create({
     name: req.body.name,
@@ -95,6 +117,7 @@ exports.create = (req, res) => {
 }
 
 exports.update = (req, res)=> {
+  
   Location.update({
     name: req.body.name,
     email: req.body.email,
@@ -110,6 +133,7 @@ exports.update = (req, res)=> {
 };
 
 exports.delete = (req, res)=> {
+
   Location.update({
     status: 'D',
   }, { where: {id: req.params.id} }).then(num => {

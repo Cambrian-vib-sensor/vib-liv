@@ -1,6 +1,16 @@
 const db = require("../models");
 const Sensor = db.sensor;
+const express = require("express");
+const app = express();
 
+const bodyParser = require('body-parser');
+app.use(bodyParser.json());
+
+//!Important
+app.use(express.json());
+
+
+const { Op } = require("sequelize");
 exports.bulkcreate = (req, res)=> {
   // Validate request
   if (!req.body.sensors) {
@@ -102,6 +112,29 @@ exports.findAll = (req, res)=> {
     });
 };
 
+exports.findAllActiveBylocation = (req, res)=> {
+  let condition = {
+    include: {
+      model: db.location,
+      include: { model: db.client}
+    },
+    where: {
+      state:'G'
+    }
+  };
+  Sensor.findAll(condition)
+  .then((data) => {
+    res.send(data);
+  })
+  .catch(err => {
+    res.status(500).send({
+      message:
+        err.message || "Some error occurred while retrieving sensor info."
+    });
+  });
+};
+
+
 exports.findOne = (req, res)=> {
     const id = req.params.id;
 
@@ -161,3 +194,24 @@ exports.delete = (req, res)=> {
 exports.deleteAll = (req, res)=> {
 
 };
+exports.findAllActiveSensorsByLocations = (req, res)=> {
+  const selectedLocations = req.query.data;
+ Sensor.findAll({
+   where: {          
+    location_id: {
+        [Op.in]: selectedLocations,
+      },
+      }   
+    }
+  )
+ .then((data) => {
+  res.send(data);
+  console.log(data);
+}).catch(err => {
+  res.status(500).send({
+    message:
+      err.message || "Some error occurred while retrieving location info."
+  });
+});
+};
+

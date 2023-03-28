@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const { application } = require("express");
 const routes = require("./app/routes/vibrationmonitoring.routes");
-
+const  bodyParser = require('body-parser');
 const app = express()
 
 const options = {
@@ -14,6 +14,9 @@ app.use(cors(options));
 app.use(express.json());
 
 app.use(express.urlencoded({extended:true}));
+
+app.use(bodyParser.urlencoded({extended : true}));
+app.use(bodyParser.json());
 
 routes(app);
 

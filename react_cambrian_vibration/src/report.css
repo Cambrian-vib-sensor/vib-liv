@@ -1,0 +1,10 @@
+.compname{
+float: left;
+}
+.column {
+    float: left;
+    width: 20%;
+    padding: 10px;
+    color: red;
+    height: 300px; /* Should be removed. Only for demonstration */
+  }

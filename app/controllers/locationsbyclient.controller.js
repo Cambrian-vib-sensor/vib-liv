@@ -7,11 +7,10 @@ exports.findAllActiveLocationsByClient = (req, res)=> {
     where: {
       client_id: {
         [Op.eq]: req.params.client_id },
-      // status:{ 
-
-      //      [Op.eq]:'A'
+      status:{ 
+        [Op.eq]:'A'
     
-      // },
+      },
     },
   })
  .then((data) => {

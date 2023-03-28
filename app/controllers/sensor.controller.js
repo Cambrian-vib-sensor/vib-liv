@@ -197,7 +197,7 @@ exports.deleteAll = (req, res)=> {
 exports.findAllActiveSensorsByLocations = (req, res)=> {
   const selectedLocations = req.query.data;
  Sensor.findAll({
-   where: {          
+   where: {  state : 'G',         
     location_id: {
         [Op.in]: selectedLocations,
       },

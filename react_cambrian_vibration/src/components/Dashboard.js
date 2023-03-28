@@ -32,6 +32,7 @@ import Sensor from './sensor';
 import Location from './location';
 import User from './user';
 import MapView from './map';
+import Reports from './reports';
 
 function Copyright(props) {
   return (
@@ -239,7 +240,7 @@ function Dashboard(props) {
                     <Route path="location" element={<Location/>} />
                     <Route path="sensor" element={<Sensor/>} />
                     <Route path="register" element={<User />} />
-                    <Route path="report" element={"Report"} />
+                    <Route path="report" element={<Reports />} />
                     <Route path="/" element={<SearchList />} />
                     <Route path="dashboard" element={<SearchList />} />
                     <Route path="map" element={<MapView />} />

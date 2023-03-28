@@ -107,18 +107,17 @@ const ReportView = ({ reportdata, client_id,dateArray,headerItem,newfromdate,new
     tableRow: { 
       width: '100%',
       flexDirection: "row",
-      borderWidth: 1, 
-     textAlign: 'center', 
+      textAlign: 'center', 
     }, 
     tableCol: { 
       width: '100%',
-       borderWidth: 1, 
-       padding :'5px',
+      borderWidth: 1, 
+      padding :'5px',
    }, 
 
     table:{
       width: '100%',   
-     fontSize:'8px',
+      fontSize:'8px',
       marginBottom:'5px',
       wordWrap: 'break-word',
       whiteSpace: 'pre-wrap',

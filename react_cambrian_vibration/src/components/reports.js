@@ -492,7 +492,7 @@ const Reports = (props) => {
                   <td style={tdStyle}>Period</td>
                   <td style={tdStyle}>{newfromdate} - {newtodate}</td>
                 </tr>
-                <tr style={{ textAlign: "center", border: '1px solid black' }}>
+                <tr style={{ textAlign: "center" }}>
                   <td style={tdStyle}>Location </td>
                   <td style={tdStyle}> {Array.from(new Set(arr.map((item) => item[headerItem])))}</td>
                 </tr>
@@ -500,7 +500,7 @@ const Reports = (props) => {
                   <td style={tdStyle}> Limits from table 1   </td>
                   <td style={tdStyle}>{Array.from(new Set(arr.map((item) => item.vibration_max_limit)))} mm/s</td>
                 </tr>
-                <tr style={{ textAlign: "center", border: '1px solid black' }}>
+                <tr style={{ textAlign: "center"}}>
                   <td style={tdStyle}>Activities within the area of the vibration meter</td>
                   <td style={tdStyle}>- Footsteps of people walking near the common area
                     - Operation of hospital equipment and machines.

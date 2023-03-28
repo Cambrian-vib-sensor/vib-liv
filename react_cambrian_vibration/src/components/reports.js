@@ -13,18 +13,21 @@ import { PDFDownloadLink } from '@react-pdf/renderer';
 import moment from "moment";
 
 import html2pdf from 'html2pdf.js';
+
+
 const Reports = (props) => {
+ const classes = useStyles();
+  
+ const loaderdiv = {
+  display: 'flex',
+  justifyContent: 'center',
+  };
 
-  const classes = useStyles();
   const loader = {
+  margin: 'auto 0',
+    
+  };
 
-    backgroundRepeat: 'no-repeat',
-    backgroundSize: '100%',
-    backgroundPosition: 'center center',
-    width: '50px',
-    height: '50px'
-
-  }
   const tableStyle = {
     bordercollapse: 'collapse',
     width: '100%',
@@ -442,7 +445,10 @@ const Reports = (props) => {
         <button onClick={handleDownload}>Download PDF</button>
       </div>
 
-      {loading == false ? <></> : <img src="../../loader.gif" alt="Loading..." style={loader} />}
+      {loading == false ? <></> : <div style={loaderdiv}>
+        <img src="../../loader.gif" alt="Loading..." style={loader} />
+        </div>
+        }
 
 
       {reportdata.length === 0 || Object.values(reportdata).length === 0 ? (

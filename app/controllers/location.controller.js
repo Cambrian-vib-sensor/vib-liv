@@ -42,11 +42,8 @@ exports.findAllActive = (req, res)=> {
     });
   });
 };
-
-
 exports.findAll = (req, res)=> {
- 
-    Location.findAll({
+     Location.findAll({
       include: {model: db.client},
     })
     .then((data) => {

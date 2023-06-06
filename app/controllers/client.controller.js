@@ -1,6 +1,6 @@
 const db = require("../models");
 const Client = db.client;
-
+const { Op } = require('sequelize');
 exports.bulkcreate = (req, res)=> {
   // Validate request
   if (!req.body.clients) {
@@ -24,9 +24,16 @@ exports.bulkcreate = (req, res)=> {
 };
 
 exports.findAllActive = (req, res)=> {
+
+  const c_id= req.clientId;
+  const u_role = req.role;
+
+if(u_role == 'A'){
+  console.log("cam_admin");
   Client.findAll({
     where: {'status': 'A'}
   })
+
   .then((data) => {
     res.send(data);
   })
@@ -36,7 +43,28 @@ exports.findAllActive = (req, res)=> {
         err.message || "Some error occurred while retrieving client info."
     });
   });
-};
+}else if(u_role == 'C' && c_id!=''){
+console.log("cam_client");
+Client.findOne({
+    where: {
+      status: 'A',
+      // Add another condition here
+      id:{
+        [Op.eq]: c_id,
+      }
+    } 
+})
+  .then((data) => {
+    res.send(data);
+  })
+  .catch(err => {
+    res.status(500).send({
+      message:
+        err.message || "Some error occurred while retrieving client info."
+    });
+  });
+
+}};
 
 exports.findAll = (req, res)=> {
     Client.findAll()

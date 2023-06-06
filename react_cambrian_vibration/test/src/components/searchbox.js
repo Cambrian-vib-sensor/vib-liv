@@ -42,6 +42,25 @@ export default class SearchList extends Component {
     }
   }
 
+    // Pdf Download 
+    handleDownload = () => {
+      const input = document.getElementById("pdf-download");
+      html2pdf().from(input).set({
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
+        filename: "my-document.pdf",
+        margin: [0.5, 0.5],
+        jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
+        onAfterPageContent: (currentPage, totalPages) => {
+          const footer = document.createElement("div");
+          footer.style.fontSize = "10pt";
+          footer.style.textAlign = "center";
+          footer.innerHTML = `Page ${currentPage} of ${totalPages}`;
+          return footer;
+        }
+      }).save();
+    };
+
+
   handleSensorChange(event) {
     var search_params = {...this.state.search_params};
     search_params.sensorid = event.target.value;
@@ -156,9 +175,15 @@ export default class SearchList extends Component {
           <br />
           <button type="button" id="search" className="btn btn-secondary" onClick={this.handleSubmit}>Search</button>
         </div>
+        <div className="col-md-3 form-group">
+          <br />
+          <button type="button" id="search" className="btn btn-secondary" onClick={this.handleDownload}>PDF</button>
+        </div>
       </div>
       <div className="row">
+      <div id="pdf-download">
           <SensorDataTable data={search_result} fromdate={search_params.fromdate} todate={search_params.todate} status={status} sensorid={search_params.sensorid}/>
+      </div>
       </div>
       </div>
     );

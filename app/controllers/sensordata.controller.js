@@ -2,6 +2,7 @@ const { sensordata, sensor } = require("../models");
 const db = require("../models");
 const SensorData = db.sensordata;
 const Sensor= db.sensor;
+const Clients = db.client;
 const Location= db.location;
 const Op =  db.Sequelize.Op;
 const seqWhere = db.Sequelize.where;
@@ -112,12 +113,7 @@ exports.findreportdata = async (req,res) => {
   let fromdate=reportdata.reportfromdate;
   let todate=reportdata.reporttodate;
 
-  console.log("name",sensors);
-
-  console.log("fromdate",fromdate);
-  console.log("todate",todate);
-
-if(fromdate=='' && todate==''){
+ if(fromdate=='' && todate==''){
 
   console.log("both empty");
   //query = ` SELECT * FROM sensordata WHERE sensor_id IN (SELECT ${sensor} FROM sensors) AND sensordata.sensor_value>=0.014 OR sensordata.sensor_value>=0.0125 OR sensordata.sensor_value>=0.1 AND sensordata.received_at <= CURDATE()`;
@@ -147,15 +143,16 @@ if(fromdate=='' && todate!=''){
 if(fromdate!='' && todate!=''){
 
   console.log(fromdate,todate," both not empty");
-
-  query = `SELECT locations.id,locations.name,sensors.location_id,sensors.sensor_id,sensors.vibration_max_limit,sensordata.* FROM sensordata 
-  INNER JOIN sensors ON sensors.sensor_id = sensordata.sensor_id INNER JOIN locations ON locations.id = sensors.location_id 
-  WHERE sensordata.sensor_id IN (${sensors}) AND  sensordata.received_at BETWEEN ('${fromdate}') AND ('${todate}')`;
+  query = `SELECT locations.id, locations.name, sensors.location_id, sensors.sensor_id, sensors.vibration_max_limit, sensordata.*
+  FROM sensordata
+  INNER JOIN sensors ON sensors.sensor_id = sensordata.sensor_id
+  INNER JOIN locations ON locations.id = sensors.location_id
+  WHERE sensordata.sensor_id IN (${sensors})
+    AND DATE(sensordata.received_at) = '${fromdate}'
+  `;
   metadata = { type: db.sequelize.QueryTypes.SELECT };
 }
-
   console.log("report data",query);
-
   db.sequelize.query(query, metadata) .then(data => {
     if (data) {
       res.send(data);
@@ -172,7 +169,75 @@ if(fromdate!='' && todate!=''){
   });
   }
 }
+exports.getdatafordashboardbar = (req, res) => {
 
+ let query, metadata;
+    // if (req=='') {
+      // metadata = { type: db.sequelize.QueryTypes.SELECT };
+  // } else if (req.role === 'C') {
+    //query = "Select `sensor_id` as sensorid from `sensors` s left join `locations` l on l.id = s.location_id left join `clients` c on l.client_id = c.id where c.id=?";
+    query = "SELECT sl.sensor_id, sl.location_lat, sl.location_lng, COUNT(*) AS frequency FROM sensors AS sl INNER JOIN sensordata AS sd ON sl.sensor_id = sd.sensor_id WHERE sd.sensor_value > sl.vibration_max_limit GROUP BY sl.sensor_id, sl.location_lat, sl.location_lng HAVING frequency > 0 ORDER BY frequency DESC;";
+    //query = "SELECT sl.sensor_id, sl.location_lat, sl.location_lng, COUNT(*) AS frequency FROM sensors AS sl INNER JOIN sensordata AS sd ON sl.sensor_id = sd.sensor_id WHERE sd.sensor_value > 0.000 GROUP BY sl.sensor_id, sl.location_lat, sl.location_lng HAVING frequency > 0 ORDER BY frequency DESC;";
+
+    metadata = { replacements: [req.clientId], type: db.sequelize.QueryTypes.SELECT };
+  // } else {
+  //   res.status(404).send({
+  //     message: `Invalid authorization`
+  //   });
+  //   return;
+  // } 
+  db.sequelize.query(query, metadata)
+  .then(data => {
+    if (data) {
+      res.send(data);
+    } else {
+      res.status(404).send({
+        message: `Error finding sensor data`
+      });
+    }
+  })
+  .catch(err => {
+    res.status(500).send({
+      message: err.message //"Error retrieving sensor ids"
+    });
+  });
+
+
+}
+
+exports.getdataforchatbar = (req, res) => {
+  let query, metadata;
+  // if (req=='') {
+    // metadata = { type: db.sequelize.QueryTypes.SELECT };
+// } else if (req.role === 'C') {
+  //query = "Select `sensor_id` as sensorid from `sensors` s left join `locations` l on l.id = s.location_id left join `clients` c on l.client_id = c.id where c.id=?";
+  query = "SELECT sl.sensor_id, sl.vibration_max_limit,sd.received_at,sd.sensor_value FROM sensors AS sl INNER JOIN sensordata AS sd ON sl.sensor_id = sd.sensor_id WHERE sd.sensor_value > sl.vibration_max_limit GROUP By sl.sensor_id";
+  metadata = { replacements: [req.clientId], type: db.sequelize.QueryTypes.SELECT };
+// } else {
+//   res.status(404).send({
+//     message: `Invalid authorization`
+//   });
+//   return;
+// } 
+db.sequelize.query(query, metadata)
+.then(data => {
+  if (data) {
+    res.send(data);
+  } else {
+    res.status(404).send({
+      message: `Error finding sensor data`
+    });
+  }
+})
+.catch(err => {
+  res.status(500).send({
+    message: err.message //"Error retrieving sensor ids"
+  });
+});
+
+ 
+
+}
 exports.update = (req, res)=> {
 
 };

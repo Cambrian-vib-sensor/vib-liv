@@ -3,7 +3,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css';
 import SignInSide from './components/SignInSide';
 import Dashboard from './components/Dashboard';
-import { Router/*, useNavigate*/ } from "react-router-dom";
+import { Router } from "react-router-dom";
 import { history } from './helpers/history';
 import { connect } from 'react-redux';
 import AuthVerify from './components/AuthVerify';

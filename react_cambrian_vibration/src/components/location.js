@@ -226,6 +226,7 @@ const Location = (props) => {
               </MenuItem>],
         }),
       },
+      
       {
         accessorKey: 'client.id',
         Cell: ({cell}) => (<>{cell.row.original.client.name}</>),
@@ -239,8 +240,11 @@ const Location = (props) => {
             </MenuItem>
           )),
           onChange: (e) => {
+            alert(e.target.value);
             let selectedClient = clients.find((client) => client.id === e.target.value);
+            console.log(selectedClient);
             txtClientStatus.current = selectedClient.status;
+
           },
         }},
       },

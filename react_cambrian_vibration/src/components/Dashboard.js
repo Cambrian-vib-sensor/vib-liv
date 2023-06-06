@@ -32,8 +32,8 @@ import Sensor from './sensor';
 import Location from './location';
 import User from './user';
 import MapView from './map';
-import Reports from './reports';
-
+import Report from './reports';
+import DashboardContent from './dashboardcontent';
 function Copyright(props) {
   return (
     <Typography variant="body2" color="text.secondary" align="center" {...props}>
@@ -158,7 +158,7 @@ function Dashboard(props) {
               noWrap
               sx={{ flexGrow: 1, fontFamily:"Georgia, serif", textShadow: "5px 5px 5px gray", paddingLeft: "5px"}}
             >
-            Cambrian Engineering Corporation Pte Ltd
+            {/* Cambrian Engineering Corporation Pte Ltd */}
             </Typography>
             <Typography>
               {props.userInfo.username}
@@ -240,10 +240,13 @@ function Dashboard(props) {
                     <Route path="location" element={<Location/>} />
                     <Route path="sensor" element={<Sensor/>} />
                     <Route path="register" element={<User />} />
-                    <Route path="report" element={<Reports />} />
-                    <Route path="/" element={<SearchList />} />
-                    <Route path="dashboard" element={<SearchList />} />
+                    <Route path="report" element={<Report />} />
+                    {/* <Route path="/" element={<SearchList />} /> */}
+                    <Route path="/" element={<DashboardContent />} />
+                    <Route path="dashboard" element={<DashboardContent />} />
+                    {/* <Route path="dashboard" element={<SearchList />} /> */}
                     <Route path="map" element={<MapView />} />
+                  
                 </Routes>                
                 </Paper>
               </Grid>

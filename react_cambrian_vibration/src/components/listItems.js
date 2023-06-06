@@ -111,7 +111,22 @@ export function MainListItems({userInfo}) {
     </Collapse>
     </>;
   } else {
-    manageList = <></>;
+    manageList = <>
+    
+    <Link to={"/report"} style={{
+            textTransform: "unset",
+            color: "inherit",
+            textDecoration: "unset"
+        }}>
+          <ListItemButton sx={{ pl: 4 }}>
+            <ListItemIcon>
+              <BarChartIcon />
+            </ListItemIcon>
+            <ListItemText primary="Reports" />
+          </ListItemButton>
+        </Link>
+    
+    </>;
   }
 
   return(

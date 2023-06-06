@@ -12,13 +12,14 @@ class VibrationDataService {
         return http.post('/daterange', data);
     }*/
     getsensorbydaterange(data) {
-        
+        console.log("data",data);
         return http.post('/sensordata', data, {headers: authHeader()});
     }
     getsensoridlist() {
         return http.get('/sensordata/sensorids', {headers: authHeader()});
     }
     getclients() {
+        
         return http.get('/clients', {headers: authHeader()});
     }
     getactiveclients() {
@@ -84,15 +85,39 @@ class VibrationDataService {
         return http.get(`/locationsbyclient/client_id/${client_id}`,{headers: authHeader()});       
         
     } 
-    getSensorsByLocation(data){
-        console.log(data);
-          return http.get(`/sensor/locations`,{ params: { data } },{headers: {'Content-Type': 'application/json'},});
-    }
+    getSensorsByLocation(data) {
+        const config = {
+          params: { data },
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeader()
+          }
+        };
+        
+        return http.get('/sensor/locations', config);
+      }
 
     getreportdata(data){
-        console.log(data);
-          return http.get(`/sensordata/fetchreportdata`,{ params: { data } },{headers: {'Content-Type': 'application/json'},});
+        const config = {
+            params: { data },
+            headers: {
+              'Content-Type': 'application/json',
+              ...authHeader()
+            }
+          };    
+          return http.get(`/sensordata/fetchreportdata`,config);
     }
+    
+    getSensorDetailsForDashboardMap () {
+        console.log("Dash");
+        return http.get(`/sensordata/fetchalllocanddata`,{ headers: authHeader()});
+    
+    }
+    getsensordetailsfordashboardbar(){
+       console.log("Bar");
+       return http.get(`/sensordata/fetchallbardata`,{ headers: authHeader()});
+    }
+
     
 }
 

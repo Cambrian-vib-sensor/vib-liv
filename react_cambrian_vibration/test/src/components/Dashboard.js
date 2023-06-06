@@ -145,7 +145,7 @@ function Dashboard(props) {
               noWrap
               sx={{ flexGrow: 1, fontFamily:"Georgia, serif", textShadow: "5px 5px 5px gray", paddingLeft: "5px"}}
             >
-            Cambrian Engineering Corporation Pte Ltd
+            {/* Cambrian Engineering Corporation Pte Ltd */}
             </Typography>
             <Typography>
               {props.userInfo.username}
@@ -227,7 +227,7 @@ function Dashboard(props) {
                     <Route path="sensor" element={<Sensor/>} />
                     <Route path="register" element={"Register"} />
                     <Route path="report" element={"Report"} />
-                    <Route path="report" element={"Map"} />
+                    <Route path="report"  element={"Map"} />
                     <Route path="/" element={<SearchList />} />
                     <Route path="dashboard" element={<SearchList />} />
                 </Routes>                

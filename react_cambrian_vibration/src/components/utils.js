@@ -40,5 +40,25 @@ const MenuProps = {
   variant: "menu"
 };
 
+import moment from 'moment'
 
-export { useStyles, MenuProps };
+
+const formatReportDataToTable = (reportData) => {
+  const result = {}
+  if (reportData && reportData.length) {
+    reportData.forEach(rp => {
+      const hour = moment(rp.received_at).hour()
+      const minute = Math.round(moment(rp.received_at).minute() / 5) * 5;
+
+      const values = result[hour]?.[minute] || []
+      result[hour] = {
+        ...result[hour],
+        [minute]: values.concat([(rp.sensor_value * 1000).toFixed(3)]) // format value here.let check on that code
+      }
+    });
+  }
+  return result
+
+}
+
+export { useStyles, MenuProps, formatReportDataToTable };

@@ -45,7 +45,6 @@ const Client = (props) => {
       } else {
         setIsRefetching(true);
       }
-
       try {
         const response =  await VibrationDataService.getclients();
         const json = response.data;
@@ -95,11 +94,9 @@ const Client = (props) => {
       //exitEditingMode(); //required to exit editing mode and close modal
     }
   };
-
   const handleCancelRowEdits = () => {
     setValidationErrors({});
   };
-
   const handleDeleteRow = useCallback(
     (row) => {
       if (

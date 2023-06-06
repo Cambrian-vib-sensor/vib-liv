@@ -1,6 +1,7 @@
 import React from 'react';
 import { Page, Text, View, Document, StyleSheet,Font,Image,Link} from '@react-pdf/renderer';
 import { TableCell,TableRow,TableHead,Table,TableBody } from '@mui/material';
+import Sensordatatable from './sensordatatable';
 
 const ReportView = ({ reportdata, client_id,dateArray,headerItem,newfromdate,newtodate }) =>{
 
@@ -126,11 +127,11 @@ const ReportView = ({ reportdata, client_id,dateArray,headerItem,newfromdate,new
   }); 
 
     return (
-     
+     <div>
       <Document>
       <Page style={styles.body}>
       <Text style={styles.header} fixed>
-        Cambrian Engineering Corporation Pte Ltd.
+        {/* Cambrian Engineering Corporation Pte Ltd. */}
       </Text>
       <View style={styles.grid} fixed>
       <View style={styles.column}>
@@ -172,7 +173,7 @@ const ReportView = ({ reportdata, client_id,dateArray,headerItem,newfromdate,new
            
       <Text style={styles.subtitlereporttype}>Vibration Monitoring Report</Text>
       <Text  style={styles.subtitlereporttype}>at</Text>
-      <Text  style={styles.subtitlereporttype}>Mount Alvernia Hospital</Text>
+      <Text  style={styles.subtitlereporttype}></Text>
       <Text style={styles.subtitleclinent} > Client: Shimizu Corporation</Text>
       <Text style={styles.subtitle}> 1.0 Introduction</Text>
       <Text style={styles.content}>
@@ -203,7 +204,7 @@ const ReportView = ({ reportdata, client_id,dateArray,headerItem,newfromdate,new
         and good mobile coverage to send SMS notifications.
       </Text>
 
-      <Image
+      {/* <Image
         style={styles.flowchartimage}
         src="../../flowchart.png"
       />
@@ -240,13 +241,13 @@ const ReportView = ({ reportdata, client_id,dateArray,headerItem,newfromdate,new
        There were no construction activities on Sunday, 2 2 n d Jan 2023.{"\n"}  
        All activities are reported by Shimizu Corporation.
 
-      </Text>
+      </Text> 
   
       <Image
         style={styles.image}
         src="/images/quijote2.png"
-      />
-        <Text style={styles.subtitle} > 4.0 Results</Text>
+      />*/}
+        <Text style={styles.subtitle} >Results</Text>
         <Text style={styles.subtitle}> </Text>
    
      
@@ -410,6 +411,8 @@ const ReportView = ({ reportdata, client_id,dateArray,headerItem,newfromdate,new
       )} fixed />
     </Page>
   </Document>
+  
+  </div>
    
  )}
 

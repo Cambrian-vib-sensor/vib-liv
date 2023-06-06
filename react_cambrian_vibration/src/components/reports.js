@@ -7,51 +7,40 @@ import { setMessage } from '../actions/message';
 import Reportview from './reportview.js';
 import { Select, MenuItem, FormControl, InputLabel, ListItemIcon, Checkbox, ListItemText, OutlinedInput, Button } from '@mui/material';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
-import { MenuProps, useStyles, options } from "./utils";
+import { MenuProps, useStyles, options, formatReportDataToTable } from "./utils";
 import { PDFDownloadLink } from '@react-pdf/renderer';
+import SearchList from './searchbox.js';
 // import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core';
 import moment from "moment";
-
 import html2pdf from 'html2pdf.js';
+import './Report.css';
+import Searchbox from './searchbox.js';
 
+
+const MINUTES_DATA = [
+  '0',
+  '5',
+  '10',
+  '15',
+  '20',
+  '25',
+  '30',
+  '35',
+  '40',
+  '50',
+  '55',
+]
 
 const Reports = (props) => {
- const classes = useStyles();
-  
- const loaderdiv = {
-  display: 'flex',
-  justifyContent: 'center',
+  const classes = useStyles();
+
+  const loaderdiv = {
+    display: 'flex',
+    justifyContent: 'center',
   };
 
   const loader = {
-  margin: 'auto 0',
-    
-  };
-
-  const tableStyle = {
-    bordercollapse: 'collapse',
-    width: '100%',
-
-  };
-  const thStyle = {
-
-    textAlign: "center", border: '1px solid black',
-
-  };
-  const trStyle = {
-    backgroundColor: '#eee',
-    padding: '5px',
-    textAlign: 'center',
-    pageBreakInside: 'avoid !important',
-
-  };
-
-  const tdStyle = {
-    border: '1px solid black',
-    padding: '5px',
-    width: '10%',
-    textAlign: 'center',
-    pageBreakInside: 'avoid',
+    margin: 'auto 0',
 
   };
 
@@ -76,8 +65,20 @@ const Reports = (props) => {
   const [newfromdate, setfromdate] = useState('');
   const [newtodate, settodate] = useState('');
 
+  // var formattedData = {};
+  // var format = {};
+  // var dates = getDatesInRange(fromdate,todate);
+  // var today = new Date();
+
+  const INTERVALS_PER_HOUR = 12; // 60 minutes / 5 minutes = 12 intervals per hour
+  const HOURS_PER_DAY = 24;
+  const AM_PM_LABELS = ['AM', 'PM'];
+
   useEffect(() => { getSensors(newlocationvalues) }, [newlocationvalues]);
   useEffect(() => { getsensorids(newsensorvalues) }, [newsensorvalues]);
+
+  
+
 
   const handleLocationChange = (event) => {
     setsensorSelected([]);
@@ -160,26 +161,24 @@ const Reports = (props) => {
 
   //Create an array of dates between the start and end dates
   const dateArray = [];
-  const headerItem = "name";
-  let currentDate = new Date(fromdate);
-  let enddate = new Date(todate);
-  while (currentDate <= new Date(enddate)) {
-    dateArray.push(new Date(currentDate));
-    currentDate.setDate(currentDate.getDate() + 1);
-  }
-  const tableRows = dateArray.map(date => {
-    const formattedDate = date.toISOString().substring(0, 10);
+  // const headerItem = "name";
+  // let currentDate = new Date(fromdate);
+  // let enddate = new Date(todate);
+  // while (currentDate <= new Date(enddate)) {
+  //   dateArray.push(new Date(currentDate));
+  //   currentDate.setDate(currentDate.getDate() + 1);
+  // }
+  // const tableRows = dateArray.map(date => {
+  //   const formattedDate = date.toISOString().substring(0, 10);
 
-    return (
-      <tr key={formattedDate}>
-        <td>{formattedDate}</td>
-      </tr>
-    );
-  });
+  //   return (
+  //     <tr key={formattedDate}>
+  //       <td>{formattedDate}</td>
+  //     </tr>
+  //   );
+  // });
 
-  const arraydata = Object.values(tableRows);
-  console.log("array", arraydata);
-  /* Onchange of client get locations of the clients */
+
   useEffect(() => { getLocation(client_id) }, [client_id]);
   const clientid = (e) => {
     setClient_id(e.target.value);
@@ -210,6 +209,7 @@ const Reports = (props) => {
     }
   };
 
+
   const getsensorids = (selectedsensorids) => {
     setsensoreids(selectedsensorids);
   }
@@ -227,10 +227,9 @@ const Reports = (props) => {
         return;
       }
     };
-
     fetchSensors();
-
   };
+
 
   const reportsubmit = (event) => {
     setLoading(false);
@@ -239,12 +238,9 @@ const Reports = (props) => {
     const reportsensorids = sensorids;
     const reportfromdate = fromdate;
     const reporttodate = todate;
-
     setfromdate(moment(fromdate).format("DD-MMM-YYYY"));
     settodate(moment(todate).format("DD-MMM-YYYY"));
-
     const data = { reportsensorids, reportfromdate, reporttodate }
-
     const fetchSensordata = async () => {
       setLoading(true);
       try {
@@ -259,7 +255,6 @@ const Reports = (props) => {
           acc[key].push(obj);
           return acc;
         }, {});
-
         setsensorsdata(groupedObject);
         setLoading(false);
       } catch (error) {
@@ -273,8 +268,77 @@ const Reports = (props) => {
   }
 
   useEffect(() => {
-  }, [reportsubmit]);
+  }, [reportsubmit, fromdate, todate]);
+  const styles = {
+    pagebreak: {
+      pageBreakAfter: 'always'
+    }
+  };
+  const generateTable = (startDate, endDate, dataTable) => {
+    const tableData = [];
+    const currentDate = new Date(startDate);
 
+    // Set the currentDate to the start of the day (12 AM)
+    currentDate.setHours(0, 0, 0, 0);
+
+    // Create a new Date object for the endDate and set the hours, minutes, seconds, and milliseconds
+    const endDateTime = new Date(endDate);
+    endDateTime.setHours(23, 59, 59, 999);
+
+    const timeSlots = [];
+    for (let hour = 0; hour < 24; hour++) {
+      const formattedHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+      const ampm = hour >= 12 ? 'PM' : 'AM';
+      const formattedTime = `${formattedHour}:00:00 ${ampm}`;
+      timeSlots.push(formattedTime);
+    }
+
+    while (currentDate <= endDateTime) {
+      const formattedDate = currentDate.toLocaleString('default', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+      });
+
+      const row = (
+        <>
+        {
+          timeSlots.map((ts, i) => {
+            if(i === 0) {
+              return <tr key={`row-${formattedDate}`} className='inner-table'>
+              <td rowSpan={timeSlots.length}>{formattedDate}</td>
+              <td>
+                {ts}
+              </td>
+              {
+                  MINUTES_DATA.map(m =>  <td key={m}>{dataTable[i]?.[m] || ''}</td>)
+                }
+           
+            </tr>
+            } 
+            return  <tr> 
+              <td>{ts} </td>
+              {
+                  MINUTES_DATA.map(m =>  <td key={m}>{dataTable[i]?.[m] || ''}</td>)
+                }
+              </tr>
+          } )
+        }
+        
+        </>
+      );
+
+      tableData.push(row);
+
+      currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
+    }
+
+    return tableData;
+  };
+
+ 
+
+  const tableRows = (dataTable) => generateTable(fromdate, todate, dataTable);
   return (
     <div>
       <form onSubmit={reportsubmit}>
@@ -290,10 +354,25 @@ const Reports = (props) => {
                 sx={{ width: 150 }}
                 label="Client"
               >
-                <MenuItem value="empty">Select Client</MenuItem>
-                {clients.map((options) => {
-                  return <MenuItem key={options.id} value={options.id}>{options.name}</MenuItem>
-                })}
+                {clients.length > 1 ? (
+                  [
+                    <MenuItem key="empty" value="empty">Select Client</MenuItem>,
+                    clients.map((options) => (
+                      <MenuItem key={options.id} value={options.id}>
+                        {options.name}
+                      </MenuItem>
+                    ))
+                  ]
+                ) : (
+                  [
+                    <MenuItem key="empty" value="empty">Select Client</MenuItem>,
+                    clients && (
+                      <MenuItem key={clients.id} value={clients.id}>
+                        {clients.name}
+                      </MenuItem>
+                    )
+                  ]
+                )}
               </Select>
             </FormControl>
           </Col>
@@ -432,127 +511,53 @@ const Reports = (props) => {
 
       <div style={{ float: "right", marginBottom: '50px' }}>
 
-        {/* {reportdata.length === 0 ? (<></>) : (
+        {/* { {reportdata.length === 0 ? (<></>) : (
    
       < PDFDownloadLink document={<Reportview reportdataValues={ [reportdataValues , dateArray] } />} fileName="Vibrationsensor" >
        {({ loading }) => loading ? (<Button variant="contained" endIcon={<FileDownloadIcon />}>Loading Document...</Button>) : (<Button variant="contained" endIcon={<FileDownloadIcon />}>Download</Button>)}
       </PDFDownloadLink>            
-      )} */}
+      )} } */}
 
         {<PDFDownloadLink document={<Reportview newfromdate={newfromdate} newtodate={newtodate} headerItem="name" reportdata={reportdata} client_id={client_id} dateArray={dateArray} />} fileName="Vibrationsensor" >
           {({ loading }) => loading ? (<Button variant="contained" endIcon={<FileDownloadIcon />}>Loading Document...</Button>) : (<Button variant="contained" endIcon={<FileDownloadIcon />}>Download</Button>)}
         </PDFDownloadLink>}
         <button onClick={handleDownload}>Download PDF</button>
+
       </div>
 
       {loading == false ? <></> : <div style={loaderdiv}>
         <img src="../../loader.gif" alt="Loading..." style={loader} />
-        </div>
-        }
-
-
-      {reportdata.length === 0 || Object.values(reportdata).length === 0 ? (
-        <table style={tableStyle}>
-          <tr style={trStyle}>
-            <th style={thStyle}>Report Results</th>
-          </tr>
-          <tr style={tdStyle}>
-            <td style={tdStyle}>No Records Found</td>
-          </tr>
+      </div>
+      }
+      {Object.values(reportdata).map((arr) => {
+        console.log(arr)
+         console.log(formatReportDataToTable(arr))
+         const dataTable = formatReportDataToTable(arr);
+        return  <div>
+        <h1>{Array.from(new Set(arr.map((item) => item.sensor_id)))}</h1>
+        <table >
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Time hr/5min</th>
+              {
+                MINUTES_DATA.map(m =>  <th style={{ textAlign: 'center'}} key={m}>{m}</th>)
+              } 
+            </tr>
+          </thead>
+          <tbody>
+            {tableRows(dataTable).map((row) => row)
+            }
+          </tbody>
         </table>
-      ) : (
-        <div id="pdf-download">
-          {client_id == 10 ? (
-            <table style={tableStyle}>
-              <tr style={trStyle}>
-                <th style={thStyle}>No</th>
-                <th style={thStyle}>VM name</th>
-                <th style={thStyle}>Sensor ID</th>
-                <th style={thStyle}>Locations</th>
-                <th style={thStyle}>Vibration limits criteria (10 Hz)</th>
-                <th style={thStyle}>Vibration limits criteria (80 Hz)</th>
-                <th style={thStyle}>Proposed alarm level</th>
-              </tr>
-              {Object.values(reportdata).map((arr, index) =>
-                <tr style={tdStyle}>
-                  <td style={tdStyle}>{index + 1}</td>
-                  <td style={tdStyle}> {Array.from(new Set(arr.map((item) => item[headerItem])))}</td>
-                  <td style={tdStyle}> {Array.from(new Set(arr.map((item) => item.sensor_id)))}</td>
-                  <td style={tdStyle}>{Array.from(new Set(arr.map((item) => item.vibration_max_limit)))} mm/s</td>
-                  <td style={tdStyle}>{Array.from(new Set(arr.map((item) => item.vibration_max_limit)))} mm/s</td>
-                  <td style={tdStyle}>{Array.from(new Set(arr.map((item) => item.vibration_max_limit)))} mm/s</td>
-                  <td style={tdStyle}>{Array.from(new Set(arr.map((item) => item.vibration_max_limit)))} mm/s</td>
-                </tr>
-              )}
-            </table>) : (<></>)}
-          {Object.values(reportdata).map((arr) =>
-            <table style={tableStyle}>
-              <thead><br></br>
-                <tr style={{ textAlign: "center", border: '1px solid black' }}>
-                  <td style={tdStyle}>Period</td>
-                  <td style={tdStyle}>{newfromdate} - {newtodate}</td>
-                </tr>
-                <tr style={{ textAlign: "center" }}>
-                  <td style={tdStyle}>Location </td>
-                  <td style={tdStyle}> {Array.from(new Set(arr.map((item) => item[headerItem])))}</td>
-                </tr>
-                <tr style={{ textAlign: "center", border: '1px solid black' }}>
-                  <td style={tdStyle}> Limits from table 1   </td>
-                  <td style={tdStyle}>{Array.from(new Set(arr.map((item) => item.vibration_max_limit)))} mm/s</td>
-                </tr>
-                <tr style={{ textAlign: "center"}}>
-                  <td style={tdStyle}>Activities within the area of the vibration meter</td>
-                  <td style={tdStyle}>- Footsteps of people walking near the common area
-                    - Operation of hospital equipment and machines.
-                    - Printer on the opposite side operates periodically
-                    - Trays and carts are being pushed near the common area</td>
-                </tr><br></br>
-              </thead>
-              <table style={tableStyle}>
-                <thead>
-                  <th style={thStyle}>Date</th>
-                  <th style={thStyle}>Remarks</th>
-                </thead>
-                <tbody>
-                  {dateArray.map(date => {
-                    const filteredArr = arr.filter(item => new Date(item.received_at).toISOString().substring(0, 10) === date.toISOString().substring(0, 10));
-                    const exceedsLimit = filteredArr.some(item => item.sensor_value > item.vibration_max_limit);
-                    return (
-                      <tr style={{ pageBreakInside: 'avoid' }} key={date.toISOString().substring(0, 10)}>
-                        <td style={tdStyle}>{date.toISOString().substring(0, 10)}</td>
-                        <td style={tdStyle}>
-                          {exceedsLimit
-                            ? filteredArr.map(item => (
-                              <div key={item.sensor_value}>
-                                {item.sensor_value > item.vibration_max_limit && (
-                                  <p>
-                                    Exceeding {item.vibration_max_limit} with {item.sensor_value} mm/s between 1 Hz – 80 Hz at {item.received_at}
-                                  </p>
-                                )}
-                              </div>
-                            ))
-                            : (<p>
-                              Not exceeding {Array.from(new Set(arr.map((item) => item.vibration_max_limit)))} mm/s between 1 Hz – 80 Hz
-                            </p>
-                            )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-              
-              <div className="page-break"></div>
-            </table>
-          )
-          }
-
-        </div>
-
+      </div>
+       }
       )}
     </div>
-
   )
+
+
+
 }
 
 export default Reports;

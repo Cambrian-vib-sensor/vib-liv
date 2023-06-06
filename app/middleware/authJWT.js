@@ -1,9 +1,9 @@
 const jwt = require("jsonwebtoken");
 const config = require("../../config/auth.config.js");
 const db = require("../models");
+const e = require("express");
 const Auth = db.auth;
-
-verifyToken = (req, res, next) => {
+    verifyToken = (req, res, next) => {
     let token = req.headers["x-access-token"];
   
     if (!token) {
@@ -25,19 +25,20 @@ verifyToken = (req, res, next) => {
 };
 
 getUserAuth = (req, res, next) => {
-  Auth.findByPk(req.authId).then(auth => {
+  
+ Auth.findByPk(req.authId).then(auth => {
     if (auth) {
       req.role = auth.role;
       req.clientId = auth.client_id;
       next();
       return;
     }
-
     res.status(403).send({
       message: "Error in accessing user authentication"
     });
   })
 }
+
 
 isAdmin = (req, res, next) => {
     Auth.findByPk(req.authId).then(auth => {

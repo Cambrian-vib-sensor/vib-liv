@@ -3,6 +3,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import { /*formatDateLocal, formatDateTimeLocal,*/ formatDate, getDatesInRange, checkSameDate } from "../helpers/helper.js";
 import { setSensorTableData }  from '../actions/sensor';
 import { connect } from 'react-redux';
+import html2pdf from 'html2pdf.js';
 
 const fakeDataTable = [
     [0.003, 0.004, 0.008, 0.004, 0.012, 0.009, 0.012, 0.007, 0.005, 0.011, 0.009, 0.007 ],
@@ -43,6 +44,7 @@ class SensorDataTable extends Component {
     var formattedData = {};
     var format = {};
     var dates = getDatesInRange(props.fromdate, props.todate);
+    
 	var today = new Date();
 
     //Code to generate fake data table.
@@ -58,6 +60,11 @@ class SensorDataTable extends Component {
     }
     console.log(str += "]");
     */
+    const styles = {
+        pagebreak: {
+          pageBreakAfter: 'always'
+        }
+    };
 
     dates.forEach(date => {
         formattedData[date] = {};
@@ -102,7 +109,7 @@ class SensorDataTable extends Component {
         })
     }
 
-    Object.keys(formattedData).map(item => {
+    Object.keys(formattedData).map(item => { 
         format[item] = [];
         for (let i=0; i<24; i++) {
             format[item][i] = {};
@@ -132,17 +139,38 @@ class SensorDataTable extends Component {
           //columns.push(<td style={{color: (formattedData[item].values[i][j] === "?" && !(this.props.sensorid === "AFB0_VM1_714 Dunman Road" || this.props.sensorid === "Anhc_VM1_4 Haig Lane")) ? "red" : "white"}}>{formattedData[item].values[i][j]}</td>)
           columns.push(<td style={{color:format[item][i][j]}}>{formattedData[item].values[i][j]}</td>)
         }
+     }
+     return columns;w
     }
-    return columns;
-  }
+    handlepdfDownload = () => {
+        const element = document.getElementById("Day");
+        html2pdf().set({
+            margin: 1,
+            filename: 'daily_report.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' }
+        }).from(element).toPdf().get('pdf').then(function(pdf) {
+            const totalPages = pdf.internal.getNumberOfPages();
+            for (let i = 1; i <= totalPages; i++) {
+                pdf.setPage(i);
+                pdf.setFontSize(10);
+                pdf.text(`Page ${i} of ${totalPages}`, 8, pdf.internal.pageSize.height - 0.5);
+            }
+        }).save();
+    };
 
   render() {
     const {formattedData, format} = this.state;
     if (!this.props.data.length) {
         return <><small className="form-text text-muted">{this.props.status}</small></>;
     }
-    return(
+    return(      
         <>
+        <div className="col-md-1 form-group">
+          <br />
+          <button onClick={this.handlepdfDownload}>Download PDF</button>
+        </div>
         {/*<table>
             {
                 this.props.data && this.props.data.map(item => {
@@ -151,16 +179,18 @@ class SensorDataTable extends Component {
                     <tr data-id={item.id}><td></td><td>{formatDateTimeLocal(date_processed)}</td><td>{item.sensor_value}</td></tr>
                 )})
             }
-        </table>*/}
+        </table>*/
+        }        
         <small className="form-text text-muted">{this.props.status}</small>
-        <table className="table table-striped table-dark" style={{width:"99%", marginTop:"1%"}}>
+        <table id="Day" className="table table-striped table-dark" style={{width:"99%", marginTop:"1%"}}>
         <thead><tr><th>Day</th><th>Time</th><th>00</th><th>05</th><th>10</th><th>15</th><th>20</th><th>25</th><th>30</th><th>35</th><th>40</th><th>45</th><th>50</th><th>55</th></tr></thead>
         <tbody>
         {            
             Object.keys(formattedData).map(item => {
                 const rows = [];
                 for (let i=0; i<24; i++) {
-                    rows.push(<tr>{this.colElement(i, item, formattedData, format)}</tr>)
+                    rows.push(
+                    <tr className={i % 25 === 0 && i > 0 ? 'page-break' : ''} style={i % 25 === 0 && i > 0 ? styles.pagebreak : null}>{this.colElement(i, item, formattedData, format)}</tr>)
                 }
                 return rows;
             })
@@ -180,3 +210,4 @@ function mapStateToProps(state) {
 }
   
 export default connect(mapStateToProps)(SensorDataTable)
+

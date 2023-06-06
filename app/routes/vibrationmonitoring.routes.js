@@ -1,3 +1,5 @@
+const authJwt = require("../middleware/authJWT");
+
 const vibrationmonitoringroutes = (app) => {
     const sensordata = require("../controllers/sensordata.controller");
     const sensor = require("../controllers/sensor.controller");
@@ -60,7 +62,7 @@ const vibrationmonitoringroutes = (app) => {
 
     router.get("/clients", [authJWT.verifyToken], [authJWT.isAdmin], client.findAll);
 
-    router.get("/clientsactive", [authJWT.verifyToken], [authJWT.getUserAuth], client.findAllActive);
+    router.get("/clientsactive",[authJWT.verifyToken,authJWT.getUserAuth],client.findAllActive);
 
     router.post("/client", [authJWT.verifyToken], [authJWT.isAdmin], verifyClient.checkDuplicateClient, client.create);
 
@@ -88,14 +90,18 @@ const vibrationmonitoringroutes = (app) => {
 
     router.post("/", [authJWT.verifyToken], [authJWT.isAdmin], linkedhistory.create);
 
-    router.get("/locationsbyclient/client_id/:client_id",[authJWT.verifyToken], [authJWT.isAdmin],locationsbyclient.findAllActiveLocationsByClient);
+    router.get("/locationsbyclient/client_id/:client_id",locationsbyclient.findAllActiveLocationsByClient);
     
     router.get("/sensor/locations",sensor.findAllActiveSensorsByLocations);
 
-    router.get("/sensordata/fetchreportdata",sensordata.findreportdata);
-   
-    app.use("/", router);
-      
-}
+    router.get("/sensordata/fetchreportdata", sensordata.findreportdata);
 
-module.exports = vibrationmonitoringroutes;
+    router.get("/sensordata/fetchalllocanddata", sensordata.getdatafordashboardbar);
+
+    router.get("/sensordata/fetchallbardata",sensordata.getdataforchatbar);
+ 
+    app.use("/", router); 
+      
+ }
+
+ module.exports = vibrationmonitoringroutes;

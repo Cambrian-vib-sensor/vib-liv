@@ -3,6 +3,7 @@ const Location = db.location;
 const { Op } = require("sequelize");
 
 exports.findAllActiveLocationsByClient = (req, res)=> {
+  
   Location.findAll({
     where: {
       client_id: {

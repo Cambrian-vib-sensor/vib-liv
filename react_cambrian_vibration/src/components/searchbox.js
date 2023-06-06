@@ -1,11 +1,12 @@
 import React, { Component } from "react"
 import VibrationDataService from "../services/vibration.service"
-//import 'bootstrap/dist/css/bootstrap.min.css'
 import { formatDate } from "../helpers/helper"
 import SensorDataTable from "./sensordatatable"
 import { connect } from "react-redux";
 import { ExportToCsv } from "export-to-csv";
 import { setMessage }  from '../actions/message';
+import Reports from '../components/reports';
+import { Report } from "@mui/icons-material";
 
 const options = { 
   fieldSeparator: ',',
@@ -17,6 +18,7 @@ const options = {
   useTextFile: false,
   useBom: true,
   useKeysAsHeaders: true,
+  
 };
 
 const csvExporter = new ExportToCsv(options);
@@ -30,11 +32,12 @@ class SearchList extends Component {
         sensorid: "",
         fromdate: formatDate(new Date()),
         todate: formatDate(new Date()),
+        shouldRenderComponent : false
       },
       status: "",
       search_result: []
     };
-
+   
     this.handleSensorChange = this.handleSensorChange.bind(this);
     this.handleFromDateChange = this.handleFromDateChange.bind(this);
     this.handleToDateChange = this.handleToDateChange.bind(this);
@@ -42,9 +45,18 @@ class SearchList extends Component {
 	  this.retrieveData = this.retrieveData.bind(this);
     this.handleDownload = this.handleDownload.bind(this);
   }
-
+ 
   componentDidMount() {
+
     this.retrieveSensorids();
+
+}  
+  
+ componentWillUnmount() {  
+    if (this.chart) {  
+        this.chart.dispose();  
+  }  
+
   }
 
   componentDidUpdate() {
@@ -114,8 +126,8 @@ class SearchList extends Component {
     //let nextTimeout = ((5 - (new Date().getMinutes())%5) * 60000) + 30000;
     let nextTimeout = ((5 - (today.getMinutes()%5)) * 60000) - (today.getSeconds() * 1000) + 30000;
     console.log(nextTimeout);
-
     this.timeout = setTimeout(this.retrieveData, nextTimeout);
+    
   }
 
   handleSubmit(event) {
@@ -139,7 +151,7 @@ class SearchList extends Component {
     this.retrieveData();
   }
 
-  retrieveSensorids() {
+  retrieveSensorids(){
     VibrationDataService.getsensoridlist().then(response => {
       this.setState({sensors:response.data});
       /*if (this.state.sensors) {
@@ -190,11 +202,37 @@ class SearchList extends Component {
         </div>
         <div className="col-md-2 form-group">
           <br />
-          <button type="button" id="download" className="btn btn-secondary" onClick={this.handleDownload}>Download</button>
+          <button type="button" id="download" className="btn btn-secondary" onClick={this.handleDownload}>Download CSV</button>
+          
+        </div>
+
+        <div className="col-md-2 form-group">
+          <br />
+          <button type="button" id="download" className="btn btn-secondary" onClick={this.handleDownload}>Download PDF</button>
+          
         </div>
       </div>
       <div className="row">
-          <SensorDataTable data={search_result} fromdate={search_params.fromdate} todate={search_params.todate} status={status} sensorid={search_params.sensorid}/>
+      <div id="pdf-download">
+         { <SensorDataTable data={search_result} fromdate={search_params.fromdate} todate={search_params.todate} status={status} sensorid={search_params.sensorid}/>}
+      </div>
+
+        {/* <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
+        <Grid item xs={6}>
+        <div id="SalesChart" style={{ width: "100%", height: "500px" }}></div>
+        </Grid>
+        <Grid item xs={6}>
+        <div id="chartdiv" style={{ width: "100%", height: "500px" }}></div>
+        </Grid>
+        <Grid item xs={6}>
+         
+        </Grid>
+        <Grid item xs={6}>
+        
+        </Grid>
+      </Grid>
+    */}
+ 
       </div>
       </div>
     );

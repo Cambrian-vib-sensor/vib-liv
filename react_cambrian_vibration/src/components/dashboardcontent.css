@@ -1,0 +1,23 @@
+
+.map-container {
+   position: relative;
+}
+.annotate-table {
+   width: 140px;
+   position: absolute;
+   top:17px;
+   right: 1px;
+   background-color: white;
+}
+.annotate-table td {
+   border: none;
+   font-size: 12px;
+}
+
+
+.annotate-table__item {
+   display: flex;
+   gap: 24px;
+   justify-content: space-between;
+   font-size: 14px;
+}

@@ -109,7 +109,6 @@ class VibrationDataService {
     }
     
     getSensorDetailsForDashboardMap () {
-        console.log("Dash");
         return http.get(`/sensordata/fetchalllocanddata`,{ headers: authHeader()});
     
     }

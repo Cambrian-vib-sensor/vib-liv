@@ -96,6 +96,10 @@ const vibrationmonitoringroutes = (app) => {
 
     router.get("/sensordata/fetchreportdata", sensordata.findreportdata);
 
+    router.get("/sensordata/fetchalllocanddatabyclient",[authJWT.verifyToken], [authJWT.getUserAuth], sensordata.getdatafordashboardbarbyclient);
+    
+    router.get("/sensordata/fetchallsensor",[authJWT.verifyToken], [authJWT.getUserAuth], sensordata.getallsensor);
+
     router.get("/sensordata/fetchalllocanddata", sensordata.getdatafordashboardbar);
 
     router.get("/sensordata/fetchallbardata",sensordata.getdataforchatbar);

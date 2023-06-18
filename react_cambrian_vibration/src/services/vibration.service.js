@@ -109,14 +109,17 @@ class VibrationDataService {
     }
     
     getSensorDetailsForDashboardMap () {
-        return http.get(`/sensordata/fetchalllocanddata`,{ headers: authHeader()});
+        return http.get(`/sensordata/fetchallsensor`,{ headers: authHeader()});
     
     }
     getsensordetailsfordashboardbar(){
        console.log("Bar");
        return http.get(`/sensordata/fetchallbardata`,{ headers: authHeader()});
     }
-
+    getSensorDetailsForDashboardMapByClient(){
+        console.log("Bar");
+        return http.get(`/sensordata/fetchalllocanddatabyclient`,{ headers: authHeader()});
+     }
     
 }
 

@@ -1,42 +1,75 @@
-table {
+.report-data table {
   border-collapse: collapse;
   width: 100%;
 }
 
-th,
-td {
+.report-data th, td {
   border: 1px solid #000;
   padding: 8px;
   text-align: left;
 }
 
-th {
+.report-data th {
   background-color: #f2f2f2;
 }
 
-tr:nth-child(even) {
+.report-data tr:nth-child(even) {
   background-color: #f9f9f9;
 }
 
-tr:hover {
+.report-data tr:hover {
   background-color: #ddd;
 }
 
-
-table.inner-table td {
-  border: none; /* Remove border for inner table cells */
-  padding: 0;
+.table-pdf-container {
+  break-inside: auto; 
 }
 
-table.inner-table td table{
-  border-collapse: collapse;
+.table-pdf {
+  margin-bottom: 24px;
 }
 
+td[rowspan] {
+  position: relative;
+}
 
+td[rowspan]:before {
+  position: absolute;
+  content: "";
+  top: 0px;
+  left: 0px;
+  background-color: transparent;
+  border: none;
+  width: 100%;
+  height: 100%;
+}
 
-.time-table.inner-table{
+tr {
+  break-inside: avoid; 
+}
+.table-pdf .table-pdf-top {
+  break-inside: avoid; 
+  margin-bottom: 12px;
+}
 
-    border: none; /* Remove border for inner table cells */
-    padding: 0;
+.table-pdf .table-1 {
+  width: 100%;
+}
+.table-pdf .table-1 .td-1 {
+  width: 30%;
+}
+.table-pdf .table-1 .td-2 {
+  width: 70%;
+}
 
+.table-pdf .table-2 {
+  width: 100%;
+}
+
+.table-pdf .table-2 .td-1{
+  width: 40%;
+}
+
+.table-pdf .table-2 .td-2 {
+  width: 60%;
 }

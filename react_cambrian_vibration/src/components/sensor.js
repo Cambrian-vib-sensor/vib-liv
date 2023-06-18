@@ -30,6 +30,8 @@ import { ExportToCsv } from 'export-to-csv';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
+import {  useSearchParams } from "react-router-dom";
+
 
 const Sensor = (props) => {
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -42,6 +44,24 @@ const Sensor = (props) => {
   const [clients, setClients] = useState([]);
   const txtClientName = useRef();
   const [locations, setLocations] = useState([]);
+
+  
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [pagination, setPagination] = useState({
+    pageIndex:  0,
+    pageSize:  10
+  });
+
+  useEffect(() => {
+    if (searchParams.get('page') && searchParams.get('size')) {
+      setPagination({
+        pageIndex: Number(searchParams.get('page')),
+        pageSize: Number(searchParams.get('size')),
+      })
+    }
+  }, [searchParams])
+
+
   //const txtLocationStatus = useRef();
 
   useEffect(() => {
@@ -514,6 +534,7 @@ const Sensor = (props) => {
             isLoading,
             showAlertBanner: isError,
             showProgressBars: isRefetching,
+            pagination: pagination
         }}
         columns={columns}
         data={tableData}
@@ -521,6 +542,38 @@ const Sensor = (props) => {
         enableRowSelection
         enableColumnOrdering
         enableEditing
+        enablePagination
+        muiTablePaginationProps={{
+          page: Number(pagination.pageIndex),
+          rowsPerPage: Number(pagination.pageSize),
+          onPageChange:(_, page) => {
+            if (page < 0) return;
+            setPagination((prev) => {
+              setSearchParams({
+                page: page,
+                size: prev.pageSize,
+              })
+              return ({
+                ...prev,
+                pageIndex: page
+              })
+            })
+          
+          },
+          onRowsPerPageChange: (event) => {
+            setPagination((prev) => {
+              setSearchParams({
+                size: event.target.value,
+                page: prev.pageIndex,
+              })
+              return ({
+                ...prev,
+                pageSize: event.target.value,
+              })
+            })
+          
+          }
+        }}
         //enableDensityToggle={false}
         onEditingRowSave={handleSaveRowEdits}
         onEditingRowCancel={handleCancelRowEdits}

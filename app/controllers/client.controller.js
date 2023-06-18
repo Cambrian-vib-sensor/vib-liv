@@ -67,7 +67,13 @@ Client.findOne({
 }};
 
 exports.findAll = (req, res)=> {
-    Client.findAll()
+    Client.findAll({
+      where: {
+        status: {
+          [Op.not]: 'D',   
+        }
+      }
+    })
     .then((data) => {
       res.send(data);
     })

@@ -30,6 +30,7 @@ getUserAuth = (req, res, next) => {
     if (auth) {
       req.role = auth.role;
       req.clientId = auth.client_id;
+      req.email = auth.username;
       next();
       return;
     }

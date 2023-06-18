@@ -22,12 +22,13 @@ import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import DangerousIcon from '@mui/icons-material/Dangerous';
 import VibrationDataService from "../services/vibration.service.js";
 import { connect } from "react-redux";
-import { setMessage }  from '../actions/message';
+import { setMessage } from '../actions/message';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { ExportToCsv } from 'export-to-csv';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
+import {  useSearchParams } from "react-router-dom";
 
 const Location = (props) => {
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -40,10 +41,26 @@ const Location = (props) => {
   const [clients, setClients] = useState([]);
   const txtClientStatus = useRef();
 
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [pagination, setPagination] = useState({
+    pageIndex:  0,
+    pageSize:  10
+  });
+
+  useEffect(() => {
+    if (searchParams.get('page') && searchParams.get('size')) {
+      setPagination({
+        pageIndex: Number(searchParams.get('page')),
+        pageSize: Number(searchParams.get('size')),
+      })
+    }
+  }, [])
+
+
   useEffect(() => {
     const fetchClients = async () => {
       try {
-        const response =  await VibrationDataService.getactiveclients();
+        const response = await VibrationDataService.getactiveclients();
         const json = response.data;
         setClients(json);
       } catch (error) {
@@ -65,7 +82,7 @@ const Location = (props) => {
       }
 
       try {
-        const response =  await VibrationDataService.getlocations();
+        const response = await VibrationDataService.getlocations();
         const json = response.data;
         setTableData(json);
       } catch (error) {
@@ -91,10 +108,12 @@ const Location = (props) => {
 
   const handleSaveRowEdits = async ({ exitEditingMode, row, values }) => {
     if (!Object.keys(validationErrors).length) {
-      const data = {name: values['name'], 
+      const data = {
+        name: values['name'],
         email: values['email'],
         client_id: values['client.id'],
-        status: values['status'] == 'true' ? 'A' : 'D'};
+        status: values['status'] == 'true' ? 'A' : 'D'
+      };
       if (row.original.status === 'A' && values['status'] === 'false') { //Going to delete
         window.alert("Please use the delete button to delete");
         return;
@@ -163,15 +182,15 @@ const Location = (props) => {
         error: !!validationErrors[cell.id],
         helperText: validationErrors[cell.id],
         onBlur: (event) => {
-          const isValid = 
-            cell.column.id === 'email' 
-            ? validateEmails(event.target.value) //if value.length > 0, then split emails by ; and check each entity for valid email
-            : validateRequired(event.target.value);
+          const isValid =
+            cell.column.id === 'email'
+              ? validateEmails(event.target.value) //if value.length > 0, then split emails by ; and check each entity for valid email
+              : validateRequired(event.target.value);
           if (!isValid) {
-            const errorMsg = 
+            const errorMsg =
               cell.column.id === 'email'
-              ? `${cell.column.columnDef.header} should be valid email ids separated by ;`
-              : `${cell.column.columnDef.header} is required`;
+                ? `${cell.column.columnDef.header} should be valid email ids separated by ;`
+                : `${cell.column.columnDef.header} is required`;
             //set validation error for cell if invalid
             setValidationErrors({
               ...validationErrors,
@@ -213,40 +232,42 @@ const Location = (props) => {
         header: 'Location Status',
         accessorFn: (row) => (row.status === 'A' ? 'true' : 'false'), //must be strings
         filterVariant: 'checkbox',
-        Cell: ({cell}) => (
-            <>{cell.getValue() === 'true' ? <VerifiedUserIcon color='primary'/> : <DangerousIcon color='error'/>}</>
+        Cell: ({ cell }) => (
+          <>{cell.getValue() === 'true' ? <VerifiedUserIcon color='primary' /> : <DangerousIcon color='error' />}</>
         ),
         muiTableBodyCellEditTextFieldProps: ({ cell }) => ({
-            select: true, 
-            children:
-              [<MenuItem key={'A'} value={'true'}>
-                {'Active'}
-              </MenuItem>, <MenuItem key={'D'} value={'false'}>
-                {'Deleted'}
-              </MenuItem>],
+          select: true,
+          children:
+            [<MenuItem key={'A'} value={'true'}>
+              {'Active'}
+            </MenuItem>, <MenuItem key={'D'} value={'false'}>
+              {'Deleted'}
+            </MenuItem>],
         }),
       },
-      
+
       {
         accessorKey: 'client.id',
-        Cell: ({cell}) => (<>{cell.row.original.client.name}</>),
+        Cell: ({ cell }) => (<>{cell.row.original.client.name}</>),
         header: 'Client',
         size: 140,
-        muiTableBodyCellEditTextFieldProps: (cell, row) => { return {
-          select: true, 
-          children: clients.map((client) => (
-            <MenuItem key={client.id} value={client.id}>
-              {client.name}
-            </MenuItem>
-          )),
-          onChange: (e) => {
-            alert(e.target.value);
-            let selectedClient = clients.find((client) => client.id === e.target.value);
-            console.log(selectedClient);
-            txtClientStatus.current = selectedClient.status;
+        muiTableBodyCellEditTextFieldProps: (cell, row) => {
+          return {
+            select: true,
+            children: clients.map((client) => (
+              <MenuItem key={client.id} value={client.id}>
+                {client.name}
+              </MenuItem>
+            )),
+            onChange: (e) => {
+              alert(e.target.value);
+              let selectedClient = clients.find((client) => client.id === e.target.value);
+              console.log(selectedClient);
+              txtClientStatus.current = selectedClient.status;
 
-          },
-        }},
+            },
+          }
+        },
       },
       {
         accessorKey: 'client.status',
@@ -256,14 +277,15 @@ const Location = (props) => {
         enableEditing: false, //disable editing on this column
         enableSorting: false,
         accessorFn: (row) => {
-          return (row.client.status === 'A' ? 'true' : 'false')}, //must be strings
+          return (row.client.status === 'A' ? 'true' : 'false')
+        }, //must be strings
         filterVariant: 'checkbox',
-        Cell: ({cell}) => (
-            <>{cell.getValue() === 'true' ? <VerifiedUserIcon color='primary'/> : <DangerousIcon color='error'/>}</>
+        Cell: ({ cell }) => (
+          <>{cell.getValue() === 'true' ? <VerifiedUserIcon color='primary' /> : <DangerousIcon color='error' />}</>
         ),
         muiTableBodyCellEditTextFieldProps: ({ cell }) => ({
-            value: txtClientStatus.current,
-            ...getCommonEditTextFieldProps(cell),
+          value: txtClientStatus.current,
+          ...getCommonEditTextFieldProps(cell),
         }),
       },
       {
@@ -286,9 +308,9 @@ const Location = (props) => {
     useKeysAsHeaders: false,
     headers: columns.map((c) => c.header),
   };
-  
+
   const csvExporter = new ExportToCsv(csvOptions);
-  
+
   const handleExportRows = (rows) => {
     csvExporter._options.filename = "Locations";
     csvExporter._options.title = "Locations";
@@ -314,23 +336,56 @@ const Location = (props) => {
         }}
         initialState={{ showColumnFilters: true, density: 'compact' }}
         state={{
-            isLoading,
-            showAlertBanner: isError,
-            showProgressBars: isRefetching,
+          isLoading,
+          showAlertBanner: isError,
+          showProgressBars: isRefetching,
+          pagination: pagination
         }}
         columns={columns}
         data={tableData}
-        editingMode= "modal"
+        editingMode="modal"
         enableRowSelection
         enableColumnOrdering
         enableEditing
+        enablePagination
+        muiTablePaginationProps={{
+          page: Number(pagination.pageIndex),
+          rowsPerPage: Number(pagination.pageSize),
+          onPageChange:(_, page) => {
+            if (page < 0) return;
+            setPagination((prev) => {
+              setSearchParams({
+                page: page,
+                size: prev.pageSize,
+              })
+              return ({
+                ...prev,
+                pageIndex: page
+              })
+            })
+          
+          },
+          onRowsPerPageChange: (event) => {
+            setPagination((prev) => {
+              setSearchParams({
+                size: event.target.value,
+                page: prev.pageIndex,
+              })
+              return ({
+                ...prev,
+                pageSize: event.target.value,
+              })
+            })
+          
+          }
+        }}
         //enableDensityToggle={false}
         onEditingRowSave={handleSaveRowEdits}
         onEditingRowCancel={handleCancelRowEdits}
         renderRowActions={({ row, table }) => (
           <Box sx={{ display: 'flex', gap: '1rem' }}>
             <Tooltip arrow placement="left" title="Edit">
-              <IconButton onClick={() => {txtClientStatus.current = row.original.client.status; table.setEditingRow(row)}}>
+              <IconButton onClick={() => { txtClientStatus.current = row.original.client.status; table.setEditingRow(row) }}>
                 <Edit />
               </IconButton>
             </Tooltip>
@@ -341,7 +396,7 @@ const Location = (props) => {
             </Tooltip>
           </Box>
         )}
-        renderTopToolbarCustomActions={({table}) => (
+        renderTopToolbarCustomActions={({ table }) => (
           <Box
             sx={{ display: 'flex', gap: '1rem', p: '0.5rem', flexWrap: 'wrap' }}
           >
@@ -440,10 +495,12 @@ export const CreateNewModal = ({ open, columns, onClose, onSubmit, clients, disp
 
   const modalSubmit = () => {
     //put your validation logic here
-    const data = {name: values['name'], 
-                  client_id: values['client_id'],
-                  status: values['status'],
-                  email: values['email']};
+    const data = {
+      name: values['name'],
+      client_id: values['client_id'],
+      status: values['status'],
+      email: values['email']
+    };
     VibrationDataService.createlocation(data).then(response => {
       setValues(setInitialValues);
       onSubmit();
@@ -471,17 +528,16 @@ export const CreateNewModal = ({ open, columns, onClose, onSubmit, clients, disp
           >
             {columns.map((column) => {
               if (column.accessorKey === "client.id") {
-                {/*<ClientsList setValues={setValues} values={values} column={column}/>*/}
+                {/*<ClientsList setValues={setValues} values={values} column={column}/>*/ }
                 return (
                   <FormControl fullWidth>
                     <InputLabel id="allClients">{column.header}</InputLabel>
                     <Select
-                      key={'client_id'} {...register('client_id')} error={errors['client_id'] ? true : false}labelId="allClients" label={column.header} name={'client_id'}
-                      onChange={(e) =>
-                        {
-                          let selectedClient = clients.find((client) => client.id === e.target.value);
-                          setValues({ ...values, [e.target.name]: e.target.value, ['client.status']: selectedClient.status });
-                        }}
+                      key={'client_id'} {...register('client_id')} error={errors['client_id'] ? true : false} labelId="allClients" label={column.header} name={'client_id'}
+                      onChange={(e) => {
+                        let selectedClient = clients.find((client) => client.id === e.target.value);
+                        setValues({ ...values, [e.target.name]: e.target.value, ['client.status']: selectedClient.status });
+                      }}
                     >
                       {clients.map((client) => (
                         <MenuItem key={client.id} value={client.id}>{client.name}</MenuItem>
@@ -494,40 +550,42 @@ export const CreateNewModal = ({ open, columns, onClose, onSubmit, clients, disp
                 )
               } else if (column.accessorKey === "status") {
                 return (
-                    <FormControl fullWidth>
+                  <FormControl fullWidth>
                     <InputLabel id="role-select-label">{column.header}</InputLabel>
-                    <Select key={column.accessorKey} labelId="role-select-label" label={column.header} name={column.accessorKey} value = {values[column.accessorKey]} disabled="true"
-                        onChange={(e) =>
-                            setValues({ ...values, [e.target.name]: e.target.value })}>
-                        <MenuItem key='A' value='A'>
-                            {'Active'}
-                        </MenuItem>
-                        <MenuItem key='D' value='D'>
-                            {'Deleted'}
-                        </MenuItem>
+                    <Select key={column.accessorKey} labelId="role-select-label" label={column.header} name={column.accessorKey} value={values[column.accessorKey]} disabled="true"
+                      onChange={(e) =>
+                        setValues({ ...values, [e.target.name]: e.target.value })}>
+                      <MenuItem key='A' value='A'>
+                        {'Active'}
+                      </MenuItem>
+                      <MenuItem key='D' value='D'>
+                        {'Deleted'}
+                      </MenuItem>
                     </Select>
-                    </FormControl>
+                  </FormControl>
                 )
               } else {
-              return (
-              <>
-              <TextField
-                key={column.accessorKey}
-                label={column.header}
-                name={column.accessorKey}
-                {...register(column.accessorKey)}
-                error={errors[column.accessorKey] ? true : false}
-                disabled={(column.accessorKey === "id" || column.accessorKey === "client.status")  ? true : false}
-                value = {values[column.accessorKey]}
-                onChange={(e) =>
-                  setValues({ ...values, [e.target.name]: e.target.value })
-                }
-              />
-              <Typography variant="inherit" color="error">
-                {errors[column.accessorKey]?.message}
-              </Typography>
-              </>
-            )}})}
+                return (
+                  <>
+                    <TextField
+                      key={column.accessorKey}
+                      label={column.header}
+                      name={column.accessorKey}
+                      {...register(column.accessorKey)}
+                      error={errors[column.accessorKey] ? true : false}
+                      disabled={(column.accessorKey === "id" || column.accessorKey === "client.status") ? true : false}
+                      value={values[column.accessorKey]}
+                      onChange={(e) =>
+                        setValues({ ...values, [e.target.name]: e.target.value })
+                      }
+                    />
+                    <Typography variant="inherit" color="error">
+                      {errors[column.accessorKey]?.message}
+                    </Typography>
+                  </>
+                )
+              }
+            })}
           </Stack>
         </form>
       </DialogContent>

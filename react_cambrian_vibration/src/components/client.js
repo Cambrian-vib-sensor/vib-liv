@@ -28,6 +28,8 @@ import { ExportToCsv } from 'export-to-csv';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
+import {  useSearchParams } from "react-router-dom";
+
 
 const Client = (props) => {
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -37,6 +39,20 @@ const Client = (props) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isRefetching, setIsRefetching] = useState(false);
   const [rerender, setReRendering] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [pagination, setPagination] = useState({
+    pageIndex:  0,
+    pageSize:  10
+  });
+
+  useEffect(() => {
+    if (searchParams.get('page') && searchParams.get('size')) {
+      setPagination({
+        pageIndex: Number(searchParams.get('page')),
+        pageSize: Number(searchParams.get('size')),
+      })
+    }
+  }, [searchParams])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -223,17 +239,50 @@ const Client = (props) => {
             size: 120,
           },
         }}
-        initialState={{ showColumnFilters: true, density: 'compact' }}
+        initialState={{ showColumnFilters: true, density: 'compact', pagination: pagination }}
         state={{
             isLoading,
             showAlertBanner: isError,
             showProgressBars: isRefetching,
+            pagination: pagination
         }}
         columns={columns}
         data={tableData}
         editingMode= "modal"
         enableRowSelection
         enableColumnOrdering
+        enablePagination
+        muiTablePaginationProps={{
+          page: Number(pagination.pageIndex),
+          rowsPerPage: Number(pagination.pageSize),
+          onPageChange:(_, page) => {
+            if (page < 0) return;
+            setPagination((prev) => {
+              setSearchParams({
+                page: page,
+                size: prev.pageSize,
+              })
+              return ({
+                ...prev,
+                pageIndex: page
+              })
+            })
+          
+          },
+          onRowsPerPageChange: (event) => {
+            setPagination((prev) => {
+              setSearchParams({
+                size: event.target.value,
+                page: prev.pageIndex,
+              })
+              return ({
+                ...prev,
+                pageSize: event.target.value,
+              })
+            })
+          
+          }
+        }}
         enableEditing
         //enableDensityToggle={false}
         onEditingRowSave={handleSaveRowEdits}

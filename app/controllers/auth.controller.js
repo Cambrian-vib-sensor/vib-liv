@@ -3,6 +3,7 @@ const Auth = db.auth;
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const config = require("../../config/auth.config");
+const { Op } = require('sequelize');
 
 exports.bulkcreate = (req, res)=> {
   // Validate request
@@ -28,7 +29,12 @@ exports.bulkcreate = (req, res)=> {
 
 exports.findAll = (req, res)=> {
     Auth.findAll({
-      include: {model: db.client}
+      where: {
+        status: {
+          [Op.not]: 'D',   
+        }
+      },
+      include: {model: db.client},
     })
     .then((data) => {
       res.send(data);

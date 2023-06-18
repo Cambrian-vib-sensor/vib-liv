@@ -4,7 +4,12 @@ import { /*formatDateLocal, formatDateTimeLocal,*/ formatDate, getDatesInRange, 
 import { setSensorTableData }  from '../actions/sensor';
 import { connect } from 'react-redux';
 import html2pdf from 'html2pdf.js';
-
+const styles = {
+    pagebreak: {
+      pageBreakAfter: 'always'
+    }
+  };
+  
 const fakeDataTable = [
     [0.003, 0.004, 0.008, 0.004, 0.012, 0.009, 0.012, 0.007, 0.005, 0.011, 0.009, 0.007 ],
     [0.010, 0.010, 0.005, 0.003, 0.012, 0.003, 0.007, 0.009, 0.012, 0.007, 0.003, 0.005 ],
@@ -140,7 +145,7 @@ class SensorDataTable extends Component {
           columns.push(<td style={{color:format[item][i][j]}}>{formattedData[item].values[i][j]}</td>)
         }
      }
-     return columns;w
+     return columns;
     }
     handlepdfDownload = () => {
         const element = document.getElementById("Day");

@@ -1,4 +1,5 @@
 import { makeStyles } from "@material-ui/core/styles";
+import moment from 'moment'
 
 const useStyles = makeStyles((theme) => ({
   formControl: {
@@ -40,7 +41,6 @@ const MenuProps = {
   variant: "menu"
 };
 
-import moment from 'moment'
 
 
 const formatReportDataToTable = (reportData) => {
@@ -48,17 +48,42 @@ const formatReportDataToTable = (reportData) => {
   if (reportData && reportData.length) {
     reportData.forEach(rp => {
       const hour = moment(rp.received_at).hour()
+      const date = moment(rp.received_at).date()
+  
       const minute = Math.round(moment(rp.received_at).minute() / 5) * 5;
 
-      const values = result[hour]?.[minute] || []
-      result[hour] = {
-        ...result[hour],
-        [minute]: values.concat([(rp.sensor_value * 1000).toFixed(3)]) // format value here.let check on that code
+      const hoursValue = result[date]?.[hour] || []
+      const minuteValues = result[date]?.[hour]?.[minute] || []
+
+      const hoursValueTemp = {
+        ...hoursValue,
+        [minute]: minuteValues.concat([(rp.sensor_value * 1000).toFixed(3)]) // format value here.let check on that code
+      }
+
+      result[date] = {
+        ...result[date],
+        [hour]: hoursValueTemp
       }
     });
   }
   return result
-
 }
 
-export { useStyles, MenuProps, formatReportDataToTable };
+const formatReportDataToTablePDF = (reportData) => {
+  const result = {}
+  if (reportData && reportData.length) {
+    reportData.forEach(rp => {
+      const key = moment(rp.received_at).format('DD-MMM-YYYY')
+      if (result[key]  && result[key] === 'Exceeding') {
+
+      } else {
+        result[key] = rp.sensor_value >= rp.vibration_max_limit ? `Exceeding ${rp.vibration_max_limit} with 
+        ${rp.sensor_value} mm/s between 1 Hz – 80 Hz at ${moment(rp.received_at).format('HH:mm')} ` : 'Not Exceeding'
+      }
+    });
+  }
+  return result
+}
+
+
+export { useStyles, MenuProps, formatReportDataToTable, formatReportDataToTablePDF };
